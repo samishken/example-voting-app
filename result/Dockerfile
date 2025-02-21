@@ -10,7 +10,8 @@ WORKDIR /usr/local/app
 # have nodemon available for local dev use (file watching)
 RUN npm install -g nodemon
 
-COPY package*.json ./
+# Copy package.json to docker image
+COPY package*.json ./  
 
 RUN npm ci && \
  npm cache clean --force && \
@@ -21,5 +22,7 @@ COPY . .
 ENV PORT=80
 EXPOSE 80
 
+# Use tini as the entrypoint to ensure proper signal handling
+# to start the node server
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "server.js"]
