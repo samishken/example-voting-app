@@ -12,9 +12,9 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '37e8087b-8ba7-47a4-b31d-2552d5b74e8f'
+  dockerRegistryServiceConnection: '37e8087b-2552d5b74e8f'
   imageRepository: 'votingapp'
-  containerRegistry: 'samboovotingapp.azurecr.io'
+  containerRegistry: 'svotingapp.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/vote/Dockerfile'
   tag: '$(Build.BuildId)'
 
@@ -36,3 +36,18 @@ stages:
         command: 'buildAndPush'
         Dockerfile: 'vote/Dockerfile'
         tags: '$(tag)'
+- stage: Update
+  displayName: Update
+  jobs:
+  - job: Update
+    displayName: Update
+    steps:
+    - script: |
+        sudo apt-get update -y
+        sudo apt-get install dos2unix -y
+        dos2unix scripts/updateK8sManifests.sh
+      displayName: 'Install pkgs'
+    - task: ShellScript@2
+      inputs:  
+        scriptPath: 'scripts/updateK8sManifests.sh'
+        args: 'vote $(imageRepository) $(tag)' 
